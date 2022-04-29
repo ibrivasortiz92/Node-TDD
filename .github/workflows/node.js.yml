@@ -30,4 +30,4 @@ jobs:
       with:
         heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
         heroku_email: 'ibrivasortiz92@gmail.com'
-        heroku_app_name: 'node-typescript-tdd'
+        heroku_app_name: 'still-fjord-57650'
