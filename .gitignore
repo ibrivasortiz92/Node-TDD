@@ -1,0 +1,8 @@
+node_modules
+database.sqlite
+prod-db.sqlite
+staging.sqlite
+uploads-production
+uploads-staging
+uploads-test
+uploads-dev

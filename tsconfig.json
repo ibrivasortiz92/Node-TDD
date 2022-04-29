@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    // TYPE CHECKING
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "typeRoots": ["./@types", "./node_modules/@types"],
+
+    // MODULES
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+
+    // EMIT
+    "sourceMap": true,
+
+    // INTEROP CONTRAINTS
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    // ENVIRONMENT
+    "target": "es6",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // COMPLETENESS
+    "skipLibCheck": true,
+
+    "outDir": "dist"
+  },
+  "exclude": ["node_modules"]
+}
