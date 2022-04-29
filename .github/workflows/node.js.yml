@@ -25,3 +25,9 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm run test:staging
+    - name: Deploy to Heroku
+      uses: AkhileshNS/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_email: 'ibrivasortiz92@gmail.com'
+        heroku_app_name: 'node-typescript-tdd'
