@@ -68,7 +68,8 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/config/"
+      "<rootDir>/config/",
+      "<rootDir>/__tests__/definitions/"
     ]
   },
   "eslintConfig": {

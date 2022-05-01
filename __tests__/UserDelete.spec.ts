@@ -6,16 +6,20 @@ import { Token } from '../src/entities/Token';
 import bcrypt from 'bcrypt';
 import en from '../locales/en/translation.json';
 import es from '../locales/es/translation.json';
+import { Hoax } from '../src/entities/Hoax';
 
 // GENERAL SETTINGS
 beforeAll(async () => {
+  jest.setTimeout(15000);
   await db.initialize();
 });
 beforeEach(async () => {
+  await db.manager.delete(Hoax, {});
   await db.manager.delete(Token, {});
   await db.manager.delete(User, {});
 });
 afterAll(async () => {
+  jest.setTimeout(5000);
   await db.destroy();
 });
 const activeUser = {
@@ -175,5 +179,26 @@ describe('User Delete', () => {
       },
     });
     expect(tokenInDB).toBeNull();
+  });
+
+  it('deletes hoaxes from database when delete request sent from authorized user', async () => {
+    const savedUser = await addUser();
+    const token = await auth({
+      auth: {
+        email: savedUser.email,
+        password: 'P4ssword',
+      },
+    });
+
+    await request(app).post('/api/1.0/hoaxes').set('Authorization', `Bearer ${token}`).send({
+      content: 'Hoax content',
+    });
+
+    await deleteUser(savedUser.id, {
+      token: token,
+    });
+
+    const hoaxes = await db.manager.find(Hoax);
+    expect(hoaxes.length).toBe(0);
   });
 });

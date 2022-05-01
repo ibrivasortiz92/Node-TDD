@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Hoax } from './Hoax';
 
 @Entity('user')
 export class User {
@@ -11,7 +12,7 @@ export class User {
   @Column('text')
   email: string | null;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   password: string | null;
 
   @Column({
@@ -37,4 +38,7 @@ export class User {
     nullable: true,
   })
   image?: string | null;
+
+  @OneToMany(() => Hoax, (hoax) => hoax.user)
+  hoaxes?: Hoax[];
 }

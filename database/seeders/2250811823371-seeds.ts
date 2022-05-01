@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 import { User } from '../../src/entities/User';
 import bcrypt from 'bcrypt';
 
-export class seeds1650811823371 implements MigrationInterface {
+export class seeds2250811823371 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const hash = await bcrypt.hash('P4ssword', 10);
     const users: User[] = [];

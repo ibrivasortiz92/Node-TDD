@@ -21,5 +21,8 @@
   "password_reset_request_success": "Revice su correo electrónico para reiniciar su contraseña",
   "unauthorized_password_reset": "Usted no está autorizado para modificar esta contraseña. Por favor, solicite la modificación de su contraseña de nuevo.",
   "profile_image_size": "Imagen de perfil no puede ser mayor que 2MB",
-  "unsupported_image_file": "Solo son permitidos archivos JPEG o PNG"
+  "unsupported_image_file": "Solo son permitidos archivos JPEG o PNG",
+  "unauthorized_hoax_submit": "Usted no está autorizado para publicar un chiste",
+  "hoax_submit_sucess": "Chiste guardado",
+  "hoax_content_size": "Chiste debe contener al menos 10 carácteres y como maximo 5000 carácteres"
 }

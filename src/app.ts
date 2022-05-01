@@ -10,6 +10,7 @@ import FileService from './services/FileService';
 import config from 'config';
 import path from 'path';
 import logger from './utils/logger';
+import HoaxRouter from './routes/HoaxRouter';
 
 const uploadDir: string = config.get('uploadDir');
 const profileDir: string = config.get('profileDir');
@@ -51,6 +52,7 @@ app.use('/images', express.static(profileFolder, { maxAge: ONE_YEAR_IN_MILLIS })
 app.use(tokenAuthentication);
 app.use(UserRouter);
 app.use(AuthenticationRouter);
+app.use(HoaxRouter);
 
 app.use(ErrorHandler);
 
