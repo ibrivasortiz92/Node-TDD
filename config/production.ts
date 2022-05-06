@@ -10,4 +10,5 @@ export default {
   },
   uploadDir: 'uploads-production',
   profileDir: 'profile',
+  attachmentDir: 'attachment',
 };

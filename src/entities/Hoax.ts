@@ -1,5 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './User';
+import { FileAttachment } from './FileAttachment';
 
 @Entity('hoax')
 export class Hoax {
@@ -20,4 +21,7 @@ export class Hoax {
     cascade: true,
   })
   user: User;
+
+  @OneToOne(() => FileAttachment, (fileAttachment) => fileAttachment.hoax)
+  fileAttachment?: FileAttachment;
 }

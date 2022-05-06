@@ -6,7 +6,9 @@ import config from 'config';
 
 const uploadDir: string = config.get('uploadDir');
 const profileDir: string = config.get('profileDir');
+const attachmentDir: string = config.get('attachmentDir');
 const profileFolder = path.join('.', uploadDir, profileDir);
+const attachmentFolder = path.join('.', uploadDir, attachmentDir);
 
 describe('Profile Images', () => {
   const copyFile = () => {
@@ -31,6 +33,37 @@ describe('Profile Images', () => {
   it('returns cache for 1 year in response', async () => {
     copyFile();
     const res = (await request(app).get('/images/test-file')) as unknown as Record<string, Record<string, unknown>>;
+    const oneYearInSeconds = 365 * 24 * 60 * 60;
+    expect(res.header['cache-control']).toContain(`max-age=${oneYearInSeconds}`);
+  });
+});
+
+describe('Attachments', () => {
+  const copyFile = () => {
+    const filePath = path.join('.', '__tests__', 'resources', 'test-png.png');
+    const storedFileName = 'test-attachment-file';
+    const targetPath = path.join(attachmentFolder, storedFileName);
+    fs.copyFileSync(filePath, targetPath);
+    return storedFileName;
+  };
+
+  it('returns 404 when file not found', async () => {
+    const res = await request(app).get('/attachments/123456');
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 200 ok when file exist', async () => {
+    copyFile();
+    const res = await request(app).get('/attachments/test-attachment-file');
+    expect(res.status).toBe(200);
+  });
+
+  it('returns cache for 1 year in response', async () => {
+    copyFile();
+    const res = (await request(app).get('/attachments/test-attachment-file')) as unknown as Record<
+      string,
+      Record<string, unknown>
+    >;
     const oneYearInSeconds = 365 * 24 * 60 * 60;
     expect(res.header['cache-control']).toContain(`max-age=${oneYearInSeconds}`);
   });

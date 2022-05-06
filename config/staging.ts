@@ -9,4 +9,5 @@ export default {
   },
   uploadDir: 'uploads-staging',
   profileDir: 'profile',
+  attachmentDir: 'attachment',
 };

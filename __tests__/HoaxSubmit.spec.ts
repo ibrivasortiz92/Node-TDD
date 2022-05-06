@@ -7,6 +7,8 @@ import { User } from '../src/entities/User';
 import bcrypt from 'bcrypt';
 import { Hoax } from '../src/entities/Hoax';
 import { DynamicTestInterface, ErrorInterface, OptionInterface, Response } from './definitions/custom';
+import path from 'path';
+import { FileAttachment } from '../src/entities/FileAttachment';
 
 // SETTINGS
 const activeUser = {
@@ -30,7 +32,7 @@ const addUser = async (user = { ...activeUser }) => {
 const postHoax = async (body: object = {}, options: OptionInterface = {}) => {
   let token: string | undefined = undefined;
   if (options.auth) {
-    const res: Response<RespBodyInterface & ErrorInterface<Hoax>> = await request(app)
+    const res: Response<RespBodyInterface & ErrorInterface> = await request(app)
       .post('/api/1.0/auth')
       .send(options.auth);
     token = res.body.token;
@@ -46,7 +48,16 @@ const postHoax = async (body: object = {}, options: OptionInterface = {}) => {
   if (options.token) {
     void agent.set('Authorization', `Bearer ${options.token}`);
   }
-  const res: Response<RespBodyInterface & ErrorInterface<Hoax>> = await agent.send(body);
+  const res: Response<RespBodyInterface & ErrorInterface> = await agent.send(body);
+  return res;
+};
+
+const uploadFile = async (file = 'test-png.png', options: OptionInterface = {}) => {
+  const agent = request(app).post('/api/1.0/hoaxes/attachments');
+  if (options.language) {
+    void agent.set('Accept-Language', options.language);
+  }
+  const res: Response<FileAttachment> = await agent.attach('file', path.join('.', '__tests__', 'resources', file));
   return res;
 };
 
@@ -55,6 +66,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await db.manager.delete(FileAttachment, {});
   await db.manager.delete(Hoax, {});
   await db.manager.delete(User, {});
 });
@@ -169,6 +181,49 @@ describe('Post Hoax', () => {
     const hoaxes = await db.manager.find(Hoax);
     const hoax = hoaxes[0];
     expect(hoax.userId).toBe(user.id);
+  });
+
+  it('associate hoax with attachment in database', async () => {
+    const uploadResponse = await uploadFile();
+    const uploadedFileId = uploadResponse.body.id;
+    await addUser();
+    await postHoax({ content: 'Hoax content', fileAttachmentId: uploadedFileId }, { auth: credentials });
+    const hoaxes = await db.manager.find(Hoax);
+    const hoax = hoaxes[0];
+
+    const attachmentInDB = await db.manager.findOne(FileAttachment, {
+      where: {
+        id: uploadedFileId,
+      },
+    });
+    expect(attachmentInDB).not.toBeNull();
+    expect((attachmentInDB as FileAttachment).hoaxId).toBe(hoax.id);
+  });
+
+  it('return 200 ok even attachment does not exist', async () => {
+    await addUser();
+    const res = await postHoax({ content: 'Hoax content', fileAttachmentId: 1000 }, { auth: credentials });
+    expect(res.status).toBe(200);
+  });
+
+  it('keeps the old associated hoax when new hoax submitted with old attachment id', async () => {
+    const uploadResponse = await uploadFile();
+    const uploadedFileId = uploadResponse.body.id;
+    await addUser();
+    await postHoax({ content: 'Hoax content', fileAttachmentId: uploadedFileId }, { auth: credentials });
+    const attachment = await db.manager.findOne(FileAttachment, {
+      where: {
+        id: uploadedFileId,
+      },
+    });
+    await postHoax({ content: 'Hoax content 2', fileAttachmentId: uploadedFileId }, { auth: credentials });
+    const attachment2 = await db.manager.findOne(FileAttachment, {
+      where: {
+        id: uploadedFileId,
+      },
+    });
+    expect(attachment).not.toBeNull();
+    expect((attachment as FileAttachment).hoaxId).toBe((attachment2 as FileAttachment).hoaxId);
   });
 });
 

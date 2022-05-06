@@ -9,4 +9,5 @@ export default {
   },
   uploadDir: 'uploads-test',
   profileDir: 'profile',
+  attachmentDir: 'attachment',
 };

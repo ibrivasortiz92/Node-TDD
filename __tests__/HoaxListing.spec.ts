@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../src/app';
 import { User } from '../src/entities/User';
 import { Hoax } from '../src/entities/Hoax';
+import { FileAttachment } from '../src/entities/FileAttachment';
 import db from '../database/dataSource';
 import en from '../locales/en/translation.json';
 import es from '../locales/es/translation.json';
@@ -12,6 +13,7 @@ beforeAll(async () => {
   await db.initialize();
 });
 beforeEach(async () => {
+  await db.manager.delete(FileAttachment, {});
   await db.manager.delete(Hoax, {});
   await db.manager.delete(User, {});
 });
@@ -19,20 +21,32 @@ afterAll(async () => {
   await db.destroy();
 });
 
+const addFileAttachment = async (hoaxId: number) => {
+  await db.manager.insert(FileAttachment, {
+    filename: `test-file-for-hoax-${hoaxId}`,
+    fileType: 'image/png',
+    hoaxId: hoaxId,
+    uploadDate: Date.now(),
+  });
+};
+
 // TESTS
 describe('Listing All Hoaxes', () => {
   const addHoaxes = async (count: number) => {
+    const hoaxIds: number[] = [];
     for (let i = 0; i < count; i++) {
       const res = await db.manager.insert(User, {
         username: `user${i + 1}`,
         email: `user${i + 1}@email.com`,
       });
-      await db.manager.insert(Hoax, {
+      const insertResult = await db.manager.insert(Hoax, {
         content: `hoax content ${i + 1}`,
         timestamp: i,
         userId: res.raw as number,
       });
+      hoaxIds.push(insertResult.raw as number);
     }
+    return hoaxIds;
   };
 
   const getHoaxes = async () => {
@@ -69,6 +83,17 @@ describe('Listing All Hoaxes', () => {
     const userKeys = Object.keys(hoax.user);
     expect(hoaxKeys).toEqual(['id', 'content', 'timestamp', 'user']);
     expect(userKeys).toEqual(['id', 'username', 'email', 'image']);
+  });
+
+  it('returns file attachment having filename and fileType is hoax has any', async () => {
+    const hoaxIds = await addHoaxes(1);
+    await addFileAttachment(hoaxIds[0]);
+    const res = await getHoaxes();
+    const hoax = res.body.content[0];
+    const hoaxKeys = Object.keys(hoax);
+    expect(hoaxKeys).toEqual(['id', 'content', 'timestamp', 'user', 'fileAttachment']);
+    const fileAttachmentKeys = Object.keys(hoax.fileAttachment as FileAttachment);
+    expect(fileAttachmentKeys).toEqual(['filename', 'fileType']);
   });
 
   it('returns 2 as totalPages when there are 11 hoaxes', async () => {
@@ -140,13 +165,16 @@ describe('Listing Hoaxes of User', () => {
   };
 
   const addHoaxes = async (count: number, userId: number) => {
+    const hoaxIds: number[] = [];
     for (let i = 0; i < count; i++) {
-      await db.manager.insert(Hoax, {
+      const insertResult = await db.manager.insert(Hoax, {
         content: `hoax content ${i + 1}`,
         timestamp: i,
         userId,
       });
+      hoaxIds.push(insertResult.raw as number);
     }
+    return hoaxIds;
   };
 
   const getHoaxes = async (id: number, options: OptionInterface = {}) => {
@@ -157,7 +185,7 @@ describe('Listing Hoaxes of User', () => {
     if (options.query) {
       void agent.query(options.query);
     }
-    const res: Response<HoaxesPageInterface<Hoax[]> & ErrorInterface<User>> = await agent.send();
+    const res: Response<HoaxesPageInterface<Hoax[]> & ErrorInterface> = await agent.send();
     return res;
   };
 
@@ -224,6 +252,18 @@ describe('Listing Hoaxes of User', () => {
     const userKeys = Object.keys(hoax.user);
     expect(hoaxKeys).toEqual(['id', 'content', 'timestamp', 'user']);
     expect(userKeys).toEqual(['id', 'username', 'email', 'image']);
+  });
+
+  it('returns file attachment having filename and fileType is hoax has any', async () => {
+    const userId = await addUser();
+    const hoaxIds = await addHoaxes(1, userId);
+    await addFileAttachment(hoaxIds[0]);
+    const res = await getHoaxes(userId);
+    const hoax = res.body.content[0];
+    const hoaxKeys = Object.keys(hoax);
+    expect(hoaxKeys).toEqual(['id', 'content', 'timestamp', 'user', 'fileAttachment']);
+    const fileAttachmentKeys = Object.keys(hoax.fileAttachment as FileAttachment);
+    expect(fileAttachmentKeys).toEqual(['filename', 'fileType']);
   });
 
   it('returns 2 as totalPages when there are 11 hoaxes', async () => {

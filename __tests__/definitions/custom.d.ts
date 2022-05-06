@@ -19,9 +19,9 @@ export interface DynamicTestInterface {
   message: string;
 }
 
-interface ErrorInterface<T> {
+interface ErrorInterface {
   path: string;
   message: string;
   timestamp: number;
-  validationErrors: Partial<T>;
+  validationErrors: Record<string, string>;
 }

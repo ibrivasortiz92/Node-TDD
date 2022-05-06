@@ -24,5 +24,7 @@
   "unsupported_image_file": "Solo son permitidos archivos JPEG o PNG",
   "unauthorized_hoax_submit": "Usted no está autorizado para publicar un chiste",
   "hoax_submit_sucess": "Chiste guardado",
-  "hoax_content_size": "Chiste debe contener al menos 10 carácteres y como maximo 5000 carácteres"
+  "hoax_content_size": "Chiste debe contener al menos 10 carácteres y como maximo 5000 carácteres",
+  "attachment_size_limit": "Archivo adjunto no puede ser mayor que 5MB",
+  "unauthorized_hoax_delete": "No está autorizado a borrar este chiste"
 }
